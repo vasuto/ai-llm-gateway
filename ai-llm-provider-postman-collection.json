@@ -71,6 +71,28 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Hugging Face Provider, deployed on Render",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Idempotency-Key", "value": "hf-test-001" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prompt\": \"Tell a short joke about AI.\",\n  \"maxTokens\": 50,\n  \"temperature\": 0.5\n}"
+        },
+        "url": {
+          "raw": "https://ai-llm-gateway.onrender.com//v1/generate",
+          "protocol": "https",
+          "host": ["ai-llm-gateway.onrender.com"],
+          "port": "443",
+          "path": ["v1", "generate"]
+        }
+      },
+      "response": []
     }
   ]
 }
