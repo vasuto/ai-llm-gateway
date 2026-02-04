@@ -118,13 +118,6 @@ Response:
 ```
 Repeating the same request with the same Idempotency-Key returns the same id and sets cached=true.
 
-## Features
-
-Prompt blocking policy
-The prompt blocking policy uses a small, intent-focused set of regular expressions to detect common prompt injection, system probing, and credential exfiltration
-attempts. The policy is deliberately simple, transparent, and auditable, and is not intended to be a comprehensive safety system.
-
-
 ## AI tool used
 ChatGPT, running on GPT-5.2 - https://chatgpt.com/
 
@@ -152,8 +145,9 @@ src/utils/timing
 
 ## Time spend so far
 - 1h - setup the project, generate solution, fix the cached response
-- 2h - exploring and experimenting with AI providers (usable free tier, quota limits, Hugging Face, OpenAI) using different models
+- 1,5h - exploring and experimenting with AI providers (usable free tier, quota limits, Hugging Face, OpenAI) using different models
 - 1h - testing, fixing, refactoring
 - 30m - deployment, chosing provider, testing
+- 30m - testing concurrency, fixing and adding deduplication
 
 

@@ -9,9 +9,11 @@ import { GenerateInput, LLMProvider } from "../domain/provider"
 
 const cache = new TTLCache<GenerateResponse>()
 const idempotencyStore = new IdempotencyStore<GenerateResponse>()
+const inProgress = new Map<string, Promise<GenerateOutput>>() // dedupe concurrent requests
 export function resetStoresForTest() {
   cache.clear?.()
   idempotencyStore.clear?.()
+  inProgress.clear()
 }
 let provider: LLMProvider | null = null
 export function setProviderForTest(p: LLMProvider) {
@@ -31,7 +33,7 @@ export interface GenerateOutput {
   providerDurationMs?: number
 }
 
-const CACHE_ENTRY_TTL_MS = 30 * 1000
+const CACHE_ENTRY_TTL_MS = 10 * 60 * 1000
 
 export async function generate(
   input: GenerateInput,
@@ -47,8 +49,11 @@ export async function generate(
   const cached = cache.get(cacheKey)
   if (cached) {
     const response = { ...cached, cached: true }
-    console.debug("From cache store: cached=" + response.cached)
     return { response }
+  }
+
+  if (inProgress.has(cacheKey)) {
+    return await inProgress.get(cacheKey)!
   }
 
   const bodyHash = hashObject(input)
@@ -59,7 +64,6 @@ export async function generate(
   if (idempoKey) {
     const existing = idempotencyStore.get(idempoKey)
     if (existing) {
-      console.debug("From idempotency store: cached=" + existing.cached)
       return { response: existing }
     }
   }
@@ -79,32 +83,41 @@ export async function generate(
     if (idempoKey) {
       idempotencyStore.set(idempoKey, response)
     }
-    console.debug("From provider store: cached=" + response.cached)
     return { response }
   }
 
-  const providerStart = process.hrtime.bigint()
-  const result = await getProvider().generate(input)
-  const providerDurationMs =
-    Number(process.hrtime.bigint() - providerStart) / 1_000_000
+  const providerPromise = (async (): Promise<GenerateOutput> => {
+    const providerStart = process.hrtime.bigint()
+    const result = await getProvider().generate(input)
+    const providerDurationMs =
+      Number(process.hrtime.bigint() - providerStart) / 1_000_000
 
-  const response: GenerateResponse = {
-    id: randomUUID(),
-    output: result.output,
-    model: result.model,
-    cached: false,
-    usage: result.usage,
-    blocked: false,
-    blockReason: null,
-  }
+    const response: GenerateResponse = {
+      id: randomUUID(),
+      output: result.output,
+      model: result.model,
+      cached: false,
+      usage: result.usage,
+      blocked: false,
+      blockReason: null,
+    }
 
-  cache.set(cacheKey, response, CACHE_ENTRY_TTL_MS)
-  if (idempoKey) {
-    idempotencyStore.set(idempoKey, response)
-  }
+    cache.set(cacheKey, response, CACHE_ENTRY_TTL_MS)
+    if (idempoKey) {
+      idempotencyStore.set(idempoKey, response)
+    }
 
-  return {
-    response,
-    providerDurationMs
+    return {
+      response,
+      providerDurationMs
+    }
+  })()
+
+  inProgress.set(cacheKey, providerPromise)
+
+  try {
+    return await providerPromise
+  } finally {
+    inProgress.delete(cacheKey)
   }
 }
