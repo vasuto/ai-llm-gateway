@@ -1,5 +1,6 @@
 import fetch from "node-fetch"
 import { LLMProvider } from "../../domain/provider"
+import { get_encoding } from "@dqbd/tiktoken";
 
 
 interface HuggingFaceChatMessage {
@@ -59,11 +60,12 @@ export class HuggingFaceProvider implements LLMProvider {
     
     if (!output) {
       throw new Error("No assistant content returned");
-    }
-    
+    }  
 
-    const inputTokens = prompt.split(/\s+/).length
-    const outputTokens = output.split(/\s+/).length
+    const enc = get_encoding("cl100k_base")
+    const inputTokens = enc.encode(prompt).length
+    const outputTokens = enc.encode(output).length
+    enc.free()
 
     return {
       output,
