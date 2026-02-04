@@ -56,15 +56,16 @@ https://ai-llm-gateway.onrender.com/v1/generate
 
 ## Endpoints
 
-Project containg Postman collection so endpoints can be tested from there as well.
+Project contains Postman collection so endpoints can be tested from there as well.
 
-Health check endpoint /health
-
+### Health check endpoint /health
+```
 curl http://localhost:3000/health
+```
 ```
 { "status": "ok" }
 ```
-Generate text endpoint /v1/generate
+### Generate text endpoint /v1/generate
 ```
 curl -X POST http://localhost:3000/v1/generate \
   -H "Content-Type: application/json" \
@@ -91,6 +92,7 @@ curl -X POST http://localhost:3000/v1/generate \
 ```
 Example using Hugging Face Provider
 POST http://localhost:3000/v1/generate
+
 Request:
 ```
 {
