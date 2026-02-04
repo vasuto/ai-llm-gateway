@@ -43,16 +43,16 @@ npm test
 ```
 You can chose the LLM Provider by setting up environment variable
 
-no env var - Mock Provider is used
-HUGGING_FACE_API_KEY - Hugging Face Provider is used
-OPENAI_API_KEY - Open API Provider is used
+- no env var - Mock Provider is used
+- HUGGING_FACE_API_KEY - Hugging Face Provider is used
+- OPENAI_API_KEY - Open API Provider is used
 
 ## Demo
 
 Online demo is availavle on https://ai-llm-gateway.onrender.com
 see
-https://ai-llm-gateway.onrender.com/health
-https://ai-llm-gateway.onrender.com/v1/generate
+- https://ai-llm-gateway.onrender.com/health
+- https://ai-llm-gateway.onrender.com/v1/generate
 
 ## Endpoints
 
@@ -124,8 +124,9 @@ ChatGPT, running on GPT-5.2 - https://chatgpt.com/
 ## AI issues found and corrected
 
 - Cached response
-AI returned same responses (for the generate text request) with the cached=false to keep the indeponency but failed to fullfill the assignment request to marke whether ther responce is coming from cache or not marked by the flag Indicate cached=true/false in the response.
-Correct messed up order when first it saves it to the indepotency store and lookin to the cache was in the end. 
+AI returned same responses (for the generate text request) with the cached=false to keep the indeponency but failed to fullfill the assignment request to marke whether ther response is coming from cache or not marked by the flag Indicate cached=true/false in the response.
+
+- Correct wrong order when first it saved it to the indepotency store and looking to the cache was in the end. 
 
 - Extract out the generation from the handler to the generate service.
 
@@ -141,6 +142,8 @@ src/utils/timing
 - Improve some error handling to not expose direct error message to the user.
 
 - Limit max temperature to 1 instead of suggested 2
+
+- Add response deduplication for concurrent requests
 
 
 ## Time spend so far
